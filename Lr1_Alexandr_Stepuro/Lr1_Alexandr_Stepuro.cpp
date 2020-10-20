@@ -6,7 +6,7 @@
 using namespace std;
 bool PIPE_EXIST = false;
 bool CS_EXIST = false;
-struct Pipe
+struct Pipe //структура трубы
 {
     int identifier;
     float length;
@@ -133,6 +133,7 @@ void output(Pipe Pipe1, CS CS1)
         cout << "Вы забыли ввести  для КС!" << endl;
         outf << "Вы забыли ввести  для КС!";
     }
+    outf.close();
 }
 void input(Pipe& Pipe1, CS& CS1)
 {
@@ -146,6 +147,7 @@ void input(Pipe& Pipe1, CS& CS1)
         fin >> Pipe1.identifier >> Pipe1.length >> Pipe1.diameter >> Pipe1.repaired;
         fin >> CS1.identifier >> CS1.name >> CS1.amount >> CS1.amount_work >> CS1.efficiency;
     }
+    fin.close();
 }
 
 int main()
