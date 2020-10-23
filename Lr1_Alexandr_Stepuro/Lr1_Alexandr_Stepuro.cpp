@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include<fstream>
+#include<string>
 using namespace std;
 bool PIPE_EXIST = false;
 bool CS_EXIST = false;
@@ -17,11 +18,25 @@ struct Pipe //структура трубы
 struct CS
 {
     int identifier;
-    string name;
+    char name[20]; 
     int amount;
     int amount_work;
     float efficiency;
 };
+char* inputString(string msg)
+{
+    cout << msg;
+    char ch = 0;
+    char* str = new char[100];
+    int i = 0;
+    cin.ignore(1000, '\n');
+    while ((ch = cin.get()) != '\n') {
+        str[i++] = ch;
+
+    }
+    str[i] = '\0';
+    return str;
+}
 int inputInteger(string msg)
 {
     int val;
@@ -37,7 +52,7 @@ int inputInteger(string msg)
 }
  float inputFloat(string msg)
 {
-    float val;
+    float val;                                 //проверка значения
     cout << msg;
     while (((cin >> val)).fail())
     {
@@ -62,13 +77,12 @@ void addPipe(Pipe& newPipe) {
     newPipe.repaired = repaired;
  }
 void addCS(CS& newCS) {
-    string name;
     newCS.identifier = inputInteger("Введите идентификатор ");
     newCS.amount = inputInteger("Введите количество цехов");
     CS_EXIST = true;
     newCS.efficiency = inputFloat("Введите эффективность");
-    cout << "Введите имя";
-    cin >> name;
+    strcpy_s(newCS.name, inputString("Введите название: "));
+    
     int amount_work = inputInteger("Введите количество рабочих цехов");
     while (amount_work > newCS.amount) {
         cout << "Вы ввели не правильное количество рабочих цехов";
@@ -80,7 +94,7 @@ void showObjects(const Pipe& Pipe1,const CS& CS1) {
     if (PIPE_EXIST)
     cout << endl<<"Труба" << endl << "Идентификатор: " << Pipe1.identifier << endl << "Длина: " << Pipe1.length << endl << "Диаметр: " << Pipe1.diameter << endl << (Pipe1.repaired ? "В ремонте!" : "Не в ремонте!") << endl << endl;
     if (CS_EXIST)
-    cout << "КС" << endl <<"Идентификатор: " << CS1.identifier << endl << "Количество цехов: " << CS1.amount << endl << "Эффективность: " << CS1.efficiency << endl<<"Имя:"<< CS1.name << "Количество рабочих цехов:" <<CS1.amount_work<< endl << endl;
+    cout << "КС" << endl <<"Идентификатор: " << CS1.identifier << endl << "Количество цехов: " << CS1.amount << endl << "Эффективность: " << CS1.efficiency << endl<<"Имя:"<< CS1.name <<endl<< "Количество рабочих цехов:" <<CS1.amount_work<< endl << endl;
 }
 void PipeModify(Pipe& Pipe1) {
     int repaired = inputInteger("Измените параметр в ремонте, если в ремонте то введите 1 или введите 0,если не в ремонте");
@@ -105,33 +119,38 @@ void CSModify(CS& CS1) {
 void output(Pipe Pipe1, CS CS1)
 {
     ofstream outf("output.txt");
-    if (PIPE_EXIST)
-    {
-        outf << "Труба" << endl;
-        outf << "Идентификатор: " << Pipe1.identifier << endl;
-        outf << "Длина: " << Pipe1.length << endl;
-        outf << "Диаметр: " << Pipe1.diameter << endl;
-        outf << "Ремонт: " << Pipe1.repaired << endl;
+    if (!outf.is_open()) {
+        cout << "Файл не может быть открыт!\n";
     }
-    else
-    {
-        cout << "Вы забыли ввести  для трубы!" << endl;
-        outf << "Вы забыли ввести  для трубы!" << endl;
-    }
-    if (CS_EXIST)
-    {
-        outf << endl;
-        outf << "Компрессорная станция" << endl;
-        outf << "Идентификатор: " << CS1.identifier << endl;
-        outf << "Название: " << CS1.name << endl;
-        outf << "Количество цехов: " << CS1.amount << endl;
-        outf << "Количество рабочих цехов: " << CS1.amount_work << endl;
-        outf << "Эффективность: " << CS1.efficiency << endl;
-    }
-    else
-    {
-        cout << "Вы забыли ввести  для КС!" << endl;
-        outf << "Вы забыли ввести  для КС!";
+    else {
+        if (PIPE_EXIST)
+        {
+            outf << "Труба" << endl;
+            outf << "Идентификатор: " << Pipe1.identifier << endl;
+            outf << "Длина: " << Pipe1.length << endl;
+            outf << "Диаметр: " << Pipe1.diameter << endl;
+            outf << "Ремонт: " << Pipe1.repaired << endl;
+        }
+        else
+        {
+            cout << "Вы забыли ввести  для трубы!" << endl;
+            outf << "Вы забыли ввести  для трубы!" << endl;
+        }
+        if (CS_EXIST)
+        {
+            outf << endl;
+            outf << "Компрессорная станция" << endl;
+            outf << "Идентификатор: " << CS1.identifier << endl;
+            outf << "Название: " << CS1.name << endl;
+            outf << "Количество цехов: " << CS1.amount << endl;
+            outf << "Количество рабочих цехов: " << CS1.amount_work << endl;
+            outf << "Эффективность: " << CS1.efficiency << endl;
+        }
+        else
+        {
+            cout << "Вы забыли ввести  для КС!" << endl;
+            outf << "Вы забыли ввести  для КС!";
+        }
     }
     outf.close();
 }
