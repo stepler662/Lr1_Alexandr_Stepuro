@@ -7,7 +7,7 @@
 using namespace std;
 bool PIPE_EXIST = false;
 bool CS_EXIST = false;
-struct Pipe //структура трубы
+struct Pipe    //структура трубы
 {
     int identifier;
     float length;
@@ -18,16 +18,16 @@ struct Pipe //структура трубы
 struct CS
 {
     int identifier;
-    char name[20]; 
-    int amount;
+    string name; 
+    int amount; //сумма
     int amount_work;
     float efficiency;
 };
-char* inputString(string msg)
+ string inputString(string msg)
 {
     cout << msg;
     char ch = 0;
-    char* str = new char[100];
+    char str[20];
     int i = 0;
     cin.ignore(1000, '\n');
     while ((ch = cin.get()) != '\n') {
@@ -35,7 +35,8 @@ char* inputString(string msg)
 
     }
     str[i] = '\0';
-    return str;
+    return string(str);
+    
 }
 int inputInteger(string msg)
 {
@@ -81,7 +82,7 @@ void addCS(CS& newCS) {
     newCS.amount = inputInteger("Введите количество цехов");
     CS_EXIST = true;
     newCS.efficiency = inputFloat("Введите эффективность");
-    strcpy_s(newCS.name, inputString("Введите название: "));
+    newCS.name= inputString("Введите название: ");
     
     int amount_work = inputInteger("Введите количество рабочих цехов");
     while (amount_work > newCS.amount) {
@@ -118,51 +119,42 @@ void CSModify(CS& CS1) {
 }
 void output(Pipe Pipe1, CS CS1)
 {
-    ofstream outf("output.txt");
+    ofstream outf("file.txt");
     if (!outf.is_open()) {
         cout << "Файл не может быть открыт!\n";
     }
     else {
         if (PIPE_EXIST)
         {
-            outf << "Труба" << endl;
-            outf << "Идентификатор: " << Pipe1.identifier << endl;
-            outf << "Длина: " << Pipe1.length << endl;
-            outf << "Диаметр: " << Pipe1.diameter << endl;
-            outf << "Ремонт: " << Pipe1.repaired << endl;
-        }
-        else
-        {
-            cout << "Вы забыли ввести  для трубы!" << endl;
-            outf << "Вы забыли ввести  для трубы!" << endl;
+            outf << 1 << endl;
+            outf   << Pipe1.identifier << endl;
+            outf <<  Pipe1.length << endl;
+            outf <<  Pipe1.diameter << endl;
+            outf <<  Pipe1.repaired << endl;
         }
         if (CS_EXIST)
         {
-            outf << endl;
-            outf << "Компрессорная станция" << endl;
-            outf << "Идентификатор: " << CS1.identifier << endl;
-            outf << "Название: " << CS1.name << endl;
-            outf << "Количество цехов: " << CS1.amount << endl;
-            outf << "Количество рабочих цехов: " << CS1.amount_work << endl;
-            outf << "Эффективность: " << CS1.efficiency << endl;
-        }
-        else
-        {
-            cout << "Вы забыли ввести  для КС!" << endl;
-            outf << "Вы забыли ввести  для КС!";
+            outf << 2 << endl;
+            
+            outf <<  endl;
+            outf <<  CS1.identifier << endl;
+            outf <<  CS1.name << endl;
+            outf <<  CS1.amount << endl;
+            outf <<  CS1.amount_work << endl;
+            outf <<  CS1.efficiency << endl;
         }
     }
     outf.close();
 }
 void input(Pipe& Pipe1, CS& CS1)
 {
-    ifstream fin("input.txt");
-    PIPE_EXIST = true;
-    CS_EXIST = true;
+    ifstream fin("file.txt");
     if (!fin.is_open())
         cout << "Файл не может быть открыт!\n";
     else
     {
+        PIPE_EXIST = true;
+        CS_EXIST = true;
         fin >> Pipe1.identifier >> Pipe1.length >> Pipe1.diameter >> Pipe1.repaired;
         fin >> CS1.identifier >> CS1.name >> CS1.amount >> CS1.amount_work >> CS1.efficiency;
     }
