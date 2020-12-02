@@ -126,7 +126,7 @@ void output(Pipe Pipe1, CS CS1)
     else {
         if (PIPE_EXIST)
         {
-            outf << 1 << endl;
+           // outf << 1 << endl;
             outf   << Pipe1.identifier << endl;
             outf <<  Pipe1.length << endl;
             outf <<  Pipe1.diameter << endl;
@@ -134,7 +134,7 @@ void output(Pipe Pipe1, CS CS1)
         }
         if (CS_EXIST)
         {
-            outf << 2 << endl;
+           // outf << 2 << endl;
             
             outf <<  endl;
             outf <<  CS1.identifier << endl;
