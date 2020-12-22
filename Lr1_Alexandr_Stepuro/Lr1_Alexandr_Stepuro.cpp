@@ -350,19 +350,256 @@ void InputFromFile(unordered_map<int, CS>& mapCS, unordered_map<int, Pipe>& mapP
     fin.close();
 }
 
+
+
+
+void dfs(int v, unordered_map<int, vector<pair<int, int>>>& g, unordered_map<int, bool>& count, vector<int>& ans) {
+    count[v] = true;
+    vector<pair<int, int>> arr;
+    if (g.find(v) != g.end()) {
+
+        arr = g[v];
+        for (auto& el : arr) {
+            int to = el.first;
+
+            if (!count[to])
+                dfs(to, g, count, ans);
+        }
+    }
+    ans.push_back(v);
+}
+
+unordered_map<int, bool> countCS(unordered_map<int, vector<pair<int, int>>>& g)
+{
+    unordered_map<int, bool> countArr;
+    for (auto& el : g)
+    {
+        countArr[el.first] = false;
+        for (auto& p1 : el.second)
+        {
+            countArr[p1.first] = false;
+        }
+    }
+    return countArr;
+}
+
+void topologicalSort( unordered_map<int, vector<pair<int, int>>>& g, unordered_map<int, bool>& count, vector<int>& ans) {
+    count = countCS(g);
+       
+    ans.clear();
+    for (auto & el: count)
+        if (!el.second)
+            dfs(el.first, g, count, ans);
+    reverse(ans.begin(), ans.end());
+}
+
+
+unordered_map<int, int> visitedCS(unordered_map<int, vector<pair<int, int>>>& g)
+{
+    unordered_map<int, int> countArr;
+    for (auto& el : g)
+    {
+        countArr[el.first] = 0;
+        for (auto& p1 : el.second)
+        {
+            countArr[p1.first] = 0;
+        }
+    }
+    return countArr;
+}
+
+bool dfs2(int v, unordered_map<int, vector<pair<int, int>>>& g, unordered_map<int, int>& cl,  int& cycle_st) {
+    if (g.find(v) == g.end())
+    {
+        return false;
+    }
+    cl[v] = 1;
+    for (size_t i = 0; i < g[v].size(); ++i) {
+        int to;
+        to = g[v][i].first;
+        if (cl[to] == 0) {
+            if (dfs2(to, g, cl, cycle_st))  return true;
+        }
+        else if (cl[to] == 1) {
+            cycle_st = to;
+            return true;
+        }
+    }
+    cl[v] = 2;
+    return false;
+}
+
+
+
+bool searchForCycle(unordered_map<int, vector<pair<int, int>>>& graph)
+{
+    unordered_map<int, int> p;
+    int cycle_st, cycle_end;
+    p = visitedCS(graph);
+    cycle_st = -1;
+    for (auto& el : p)
+            if (dfs2(el.first, graph, p, cycle_st)) break;
+    if (cycle_st == -1) return false;
+    else return true;
+}
+
+void addConnection(unordered_map<int, vector<pair<int, int>>>& g, unordered_map<int, CS>& mapCS, unordered_map<int, Pipe>& mapPipe, int idPipe, int idCS1, int idCS2)
+{
+    pair<int, int> p1;
+    p1.second = idPipe;
+    p1.first = idCS2;
+    g[idCS1].push_back(p1);
+}
+void displayGraph(unordered_map<int, vector<pair<int, int>>>& g, unordered_map<int, CS>& mapOfCS, unordered_map<int, Pipe>& mapOfP)
+{
+    for (auto& el: g)
+    {
+        cout << "КС с ID " << el.first << " соединен с: ";
+        for (auto cs = el.second.begin(); cs != el.second.end(); cs++)
+        {
+            cout << cs->first  << " кс длиной " << mapOfP[cs->second].getLength();
+            if (cs + 1 != el.second.end()) cout << ", ";
+        }
+        cout << endl;
+    }
+}
+
+bool check(unordered_map<int, vector<pair<int, int>>>& graph, unordered_map<int, CS>& mapOfCS, unordered_map<int, Pipe>& mapOfP, int& idCS)
+{
+    
+    bool exist = false;
+    vector<int> toDelete;
+    if (graph.find(idCS) != graph.end())
+    {
+        graph.erase(idCS);
+        exist = true;
+    }
+    for (auto el = graph.begin(); el != graph.end(); el++)
+    {
+        for (auto it = 0; it < el->second.size(); it++)
+        {
+            if (el->second[it].first == idCS) {
+                el->second.erase(el->second.begin() + it);
+                exist = true;
+                toDelete.push_back(el->first);
+            }
+        }
+    }
+    return exist;
+}
+
+void deleteConnection(unordered_map<int, vector<pair<int, int>>>& g, unordered_map<int, CS> mapOfCS, unordered_map<int, Pipe>& mapOfP)
+{
+    int idCS = inputInteger("Введите ID КС: ");
+
+    while (mapOfCS.find(idCS) == mapOfCS.end())
+    {
+        cout << "Введите еще раз, в сети нет такой КС!\n";
+        idCS = inputInteger("Введите ID КС: ");
+    }
+    if (check(g, mapOfCS, mapOfP, idCS))
+    {
+        cout << "Успешно удален!\n";
+    }
+    else
+    {
+        cout << "Вершина не является истоком\n";
+    }
+
+
+}
+
+
+void OutputGraphToFile(unordered_map<int, vector<pair<int, int>>> graph, string str)
+{
+
+    ofstream fout;
+    fout.open(str + ".txt");
+    if (!fout.is_open())
+        cout << "Файл не может быть открыт!\n";
+    else
+    {
+
+        for (auto& el : graph)
+        {
+            fout << el.second.size() << " ";
+            fout <<  el.first << " ";
+            for (auto cs = el.second.begin(); cs != el.second.end(); cs++)
+            {
+                fout << cs->first << " " << cs->second << " ";
+            }
+            fout << endl;
+        }
+        cout << "Вывели в файл данные";
+        fout.close();
+    }
+}
+
+
+void displayGraph(unordered_map<int, vector<pair<int, int>>>& graph)
+{
+    for (auto& el: graph)
+    {
+        cout << "КС с ID " << el.first << " соединен с: ";
+        for (auto cs = el.second.begin(); cs != el.second.end(); cs++)
+        {
+            cout << cs->first  << " кс трубой " << cs->second;
+            if (cs + 1 != el.second.end()) cout << ", ";
+        }
+        cout << endl;
+    }
+}
+
+
+void InputGraphFromFile(unordered_map<int, vector<pair<int, int>>>& graph, string str)
+{
+
+    ifstream fin(str + ".txt");
+    if (!fin.is_open())
+        cout << "Файл не может быть открыт!\n";
+    else
+    {
+        int buff;
+        while (fin >> buff)
+        {
+            int CSid1;
+            fin >> CSid1;
+            for (int i = 0; i < buff; i++)
+            {
+                int CSid2;
+                fin >> CSid2;
+                int Pipeid;
+                fin >> Pipeid;
+                pair<int, int> pair1;
+                pair1.first = CSid2;
+                pair1.second = Pipeid;
+                graph[CSid1].push_back(pair1);
+            }
+        }
+        cout << "Ввели из файла данные";
+        fin.close();
+    }
+
+}
+
+
 int main()
 {
     //Pipe Pipe1;
     unordered_map<int, Pipe> mapOfP;
     unordered_map<int, CS> mapOfCS;
+    unordered_map<int, vector<pair<int, int>>> g;
     //CS CS1;
 	setlocale(LC_ALL, "Russian");
     while (true) {
         cout << "1.Добавить трубу" << endl << "2.Добавить КС" << endl << "3.Просмотр всех объектов" << endl << "4.Редактировать трубу" << endl << "5.Редактировать КС"
-            << endl << "6.Сохранить" << endl << "7.Загрузить" << endl << "8.Удалить трубу" << endl << "9.Удалить КС" << endl << "10.Фильтр по названию"   <<endl << "11.Фильтр по признаку в ремонте" << endl <<  "12.Фильтр по количеству незадействованных цехов" << endl << "0.Выход" << endl;
+            << endl << "6.Сохранить" << endl << "7.Загрузить" << endl << "8.Удалить трубу" << endl << "9.Удалить КС" << endl << "10.Фильтр по названию"   <<endl
+            << "11.Фильтр по признаку в ремонте" << endl <<  "12.Фильтр по количеству незадействованных цехов" <<endl<<"13.Топологическая сортировка"<< endl << "14. Добавить КС и трубы" <<endl
+            <<"15.Удалить граф"<<endl<<"16.Удалить ребро"<<endl<<"17.Удалить вершину" <<endl<<"18.Загрузить в граф файл"<<endl<<"19.Загрузить из файла" 
+            <<endl<<"20.Показать граф"<<endl << "0.Выход" << endl;
 
         int Command = inputInteger("Введите команду: ");
-        while (!(Command >= 0 && Command <= 12))
+        while (!(Command >= 0 && Command <= 20))
         {
             cout << "Вы ввели число не в том диапозоне" << endl;
             Command = inputInteger("Введите команду: ");
@@ -410,7 +647,7 @@ int main()
         case 10: {
             string str = inputString("Введите название: ");
             auto res = CSFilterByName(mapOfCS, str);
-            for(auto &cs: res)
+            for (auto& cs : res)
             {
                 cout << mapOfCS[cs];
             }
@@ -439,6 +676,152 @@ int main()
                 cout << mapOfCS[cs];
             }
             break;
+        }
+        case 13:
+        {
+            if (!searchForCycle(g))
+            {
+                unordered_map<int, bool> count;
+                vector<int> ans;
+                topologicalSort(g, count, ans);
+                for (auto index = ans.begin(); index != ans.end(); index++)
+                {
+                    cout << *index;
+                    if (index + 1 != ans.end()) cout << " -> ";
+                }
+            }
+            else
+            {
+                cout << "Граф цикличный!";
+            }
+            break;
+        }
+        case 14:
+        {
+            if (mapOfCS.size() >= 2)
+            {
+                unordered_map<int, bool> usedPipes;
+
+                for (auto& el : mapOfP)
+                {
+                    usedPipes.insert(make_pair(el.first, false));
+                }
+                for (auto& el : g)
+                {
+                    for (auto& p1 : el.second)
+                    {
+                        usedPipes[p1.first] = true;
+                    }
+                }
+                int times = inputInteger("Сколько раз Вы собираетесь вводить?");
+                int idPipe = 0, idCS1 = 0, idCS2 = 0;
+                while (times > 0)
+                {
+                    idPipe = inputInteger("Введите ID трубы (введите 0, чтобы выйти): ");
+                    if (idPipe == 0) break;
+                    while (mapOfP.find(idPipe) == mapOfP.end() || usedPipes[idPipe] || mapOfP[idPipe].getRepaired())
+                    {
+                        cout << "Введите еще раз!\n";
+                        idPipe = inputInteger("Введите ID трубы (введите 0, чтобы выйти): ");
+                        if (idPipe == 0) break;
+                    }
+                    if (idPipe == 0) break;
+                    usedPipes[idPipe] = true;
+                    idCS1 = inputInteger("Введите ID КС1, от которой идет труба (введите 0, чтобы выйти): ");
+                    if (idCS1 == 0) break;
+                    while (mapOfCS.find(idCS1) == mapOfCS.end())
+                    {
+                        cout << "Введите еще раз!\n";
+                        idCS1 = inputInteger("Введите ID КС1, от которой идет труба (введите 0, чтобы выйти): ");
+                        if (idCS1 == 0) break;
+                    }
+                    if (idCS1 == 0) break;
+                    idCS2 = inputInteger("Введите ID КС2, к которой идет труба (введите 0, чтобы выйти): ");
+                    if (idCS2 == 0) break;
+                    while (mapOfCS.find(idCS2) == mapOfCS.end())
+                    {
+                        cout << "Введите еще раз!\n";
+                        idCS2 = inputInteger("Введите ID КС2, к которой идет труба (введите 0, чтобы выйти): ");
+                        if (idCS2 == 0) break;
+                    }
+                    if (idCS2 == 0) break;
+                    times--;
+                    addConnection(g, mapOfCS, mapOfP, idPipe, idCS1, idCS2);
+                }
+                if (idPipe != 0 || idCS1 != 0 || idCS2 != 0) displayGraph(g, mapOfCS, mapOfP);
+            }
+            else
+            {
+                cout << "Недостаточно КС";
+            }
+            break;
+        }
+        case 15:
+        {
+            g.clear();
+            cout << "Граф удалён!\n";
+        }
+        case 16:
+        {
+            int i = 1;
+            for (auto& el : g)
+            {
+                for (auto it = el.second.begin(); it != el.second.end(); ++it)
+                {
+                    cout << "Номер ребрa: " << i << endl;
+                    cout << el.first << " -> " << it->first << endl;
+                    i++;
+                }
+            }
+            int num = inputInteger("Введите номер ребра, который нужно удалить:");
+            while (num <= 0 || num > i)
+            {
+                cout << "Неверный ввод:\n";
+                num = inputInteger("Введите номер ребра, который нужно удалить:");
+            }
+            int i2 = 1;
+            int res;
+            int resI;
+            bool fetched = false;
+            for (auto& el : g)
+            {
+                if (fetched) break;
+                for (auto it = 0; it < el.second.size() && !fetched; ++it)
+                {
+                    if (i2 == num)
+                    {
+                        res = it;
+                        resI = el.first;
+                        fetched = true;
+                    }
+                    i2++;
+                }
+            }
+            g[resI].erase(g[resI].begin() + res);
+            break;
+        }
+        case 17:
+        {
+            deleteConnection(g, mapOfCS, mapOfP);
+            break;
+        }
+        case 18:
+        {
+            string str = inputString("Введите название: ");
+
+            OutputGraphToFile(g, str);
+            break;
+        }
+        case 19:
+        {
+            string str = inputString("Введите название: ");
+
+            InputGraphFromFile(g, str);
+            break;
+        }
+        case 20:
+        {
+            displayGraph(g);
         }
         case 0: {
             return 0;
