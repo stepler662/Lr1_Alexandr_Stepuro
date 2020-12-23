@@ -503,7 +503,7 @@ void deleteConnection(unordered_map<int, vector<pair<int, int>>>& g, unordered_m
     }
     else
     {
-        cout << "Вершина не является истоком\n";
+        cout << "Произошла ошибка\n";
     }
 
 
