@@ -688,7 +688,9 @@ int main()
                 {
                     cout << *index;
                     if (index + 1 != ans.end()) cout << " -> ";
+
                 }
+                cout << endl;
             }
             else
             {
@@ -810,6 +812,7 @@ int main()
             string str = inputString("Введите название: ");
 
             OutputGraphToFile(g, str);
+            cout << endl;
             break;
         }
         case 19:
@@ -817,15 +820,18 @@ int main()
             string str = inputString("Введите название: ");
 
             InputGraphFromFile(g, str);
+            cout << endl;
             break;
         }
         case 20:
         {
             displayGraph(g);
+            break;
         }
         case 0: {
             return 0;
         }
+              
         }
     }
 }
